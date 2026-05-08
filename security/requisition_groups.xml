@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="requisition_group_category" model="ir.module.category">
+        <field name="name">Requisition Category</field>
+    </record>
+
+    <record id="requisition_group_privillege" model="res.groups.privilege">
+        <field name="name">Requisition Components Access</field>
+        <field name="category_id" ref="requisition_group_category"/>
+    </record>
+
+    <record id="requisition_group_user" model="res.groups">
+        <field name="name">Requisition Group User</field>
+        <field name="privilege_id" ref="requisition_group_privillege"/>
+        <field name="user_ids" eval="[(4,ref('base.user_admin'))]"/>
+    </record>
+    <record id="requisition_group_manager" model="res.groups">
+        <field name="name">Requisition Group Manager</field>
+        <field name="privilege_id" ref="requisition_group_privillege"/>
+        <field name="user_ids" eval="[(4,ref('base.user_admin'))]"/>
+    </record>
+    <record id="requisition_group_head" model="res.groups">
+        <field name="name">Requisition Group Head</field>
+        <field name="privilege_id" ref="requisition_group_privillege"/>
+        <field name="user_ids" eval="[(4,ref('base.user_admin'))]"/>
+    </record>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="user_rule" model="ir.rule">
+            <field name="name">User Rule</field>
+            <field name="model_id" ref="components_request.model_requisition_component"/>
+            <field name="groups" eval="[(4,ref('components_request.requisition_group_user'))]"/>
+            <field  name="domain_force">[('create_uid','=',user.id)]</field>
+        </record>
+
+        <record id="admin_rule" model="ir.rule">
+            <field name="name">User Rule</field>
+            <field name="model_id" ref="components_request.model_requisition_component"/>
+            <field name="groups" eval="[(4,ref('components_request.requisition_group_head'))]"/>
+            <field  name="domain_force">[(1,'=',1)]</field>
+        </record>
+    </data>
+</odoo>

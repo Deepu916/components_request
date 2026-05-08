@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem  id="requisition_component_root"
+               name="Employee Request Component"/>
+    <menuitem id="requisition_component_menu"
+              name="Request Component"
+              parent="requisition_component_root"
+              action="action_requisition_component"/>
+</odoo>
