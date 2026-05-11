@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_requisition_component,requisition_component,model_requisition_component,,1,1,1,1
 access_requisition_component_line,requisition_component_line,model_requisition_line,,1,1,1,1
+access_create_po_wizard,create_po_wizard,model_create_po,,1,1,1,1

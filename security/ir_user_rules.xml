@@ -12,7 +12,7 @@
             <field name="name">User Rule</field>
             <field name="model_id" ref="components_request.model_requisition_component"/>
             <field name="groups" eval="[(4,ref('components_request.requisition_group_head'))]"/>
-            <field  name="domain_force">[(1,'=',1)]</field>
+            <field  name="domain_force">[('state','!=','draft')]</field>
         </record>
     </data>
 </odoo>

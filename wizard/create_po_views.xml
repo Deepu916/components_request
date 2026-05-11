@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="create_po_form_view" model="ir.ui.view">
+        <field name="name">create.po.form.view</field>
+        <field name="model">create.po</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="partner_id" widget="many2many_tags" invisible="creation_type != 'po'"/>
+                    </group>
+                    <notebook>
+                        <page string="Order Lines">
+                            <field name="line_ids" readonly="True"/>
+                        </page>
+                        <footer>
+                            <button name="action_create_purchase_order" type="object" class="btn-primary" string="Create PO" invisible=" creation_type != 'po'"/>
+                            <button  type="object" class="btn-primary" string="Create Internal Transfer" invisible="creation_type != 'in'"/>
+                            <button class="btn-primary" string="Cancel" special="cancel"/>
+                        </footer>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_create_po" model="ir.actions.act_window">
+        <field name="name">Create PO</field>
+        <field name="res_model" ref="create.po"/>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_create_type':'po'}</field>
+    </record>
+
+    <record id="action_create_in" model="ir.actions.act_window">
+        <field name="name">Create PO</field>
+        <field name="res_model" ref="create.po"/>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_create_type':'in'}</field>
+    </record>
+</odoo>

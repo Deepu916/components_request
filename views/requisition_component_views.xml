@@ -7,22 +7,57 @@
             <form>
                 <header>
 
-                    <button name="action_request" class="btn-primary" type="object" string="Request" groups="components_request.requisition_group_user" invisible="state != 'draft'"/>
-                    <button name="action_manager" class="btn-primary" type="object" string="Approve Manager" groups="components_request.requisition_group_manager" invisible="state != 'requested'"/>
-                    <button name="action_head" class="btn-primary" type="object" string="Approve Head" groups="components_request.requisition_group_head" invisible="state != 'manager'"/>
-                    <button name="action_reject" class="btn-primary" type="object" string="Reject" groups="components_request.requisition_group_head" invisible="state != 'manager'"/>
-                    <button   class="btn-primary" type="object" string="Create PO"  invisible="not create_po"/>
-                    <button  class="btn-primary" type="object" string="Internal Transfer"  invisible="not create_internal_transfer"/>
+                    <button name="action_request"
+                            class="btn-primary"
+                            type="object"
+                            string="Request"
+                            groups="components_request.requisition_group_user"
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_manager"
+                            class="btn-primary"
+                            type="object"
+                            string="Approve Manager"
+                            groups="components_request.requisition_group_manager"
+                            invisible="state != 'requested'"/>
+
+                    <button name="action_head"
+                            class="btn-primary"
+                            type="object"
+                            string="Approve Head"
+                            groups="components_request.requisition_group_head"
+                            invisible="state != 'manager'"/>
+
+                    <button name="action_reject"
+                            class="btn-primary"
+                            type="object"
+                            string="Reject"
+                            groups="components_request.requisition_group_head"
+                            invisible="state != 'manager'"/>
+
+                    <button name="%(action_create_po)d"
+                            class="btn-primary"
+                            type="action"
+                            string="Create PO"
+                            groups="components_request.requisition_group_head"
+                            invisible="not create_po"/>
+
+                    <button  name="%(action_create_in)d"
+                             class="btn-primary"
+                             type="action"
+                             string="Internal Transfer"
+                             groups="components_request.requisition_group_head"
+                             invisible="not create_internal_transfer"/>
+
                     <field name="state" widget="statusbar" readonly="true"/>
                 </header>
                 <sheet>
                     <group>
                         <field name="employee_id"/>
-<!--                        <field name="product_id"/>-->
                     </group>
                     <notebook>
                         <page string="Product Lines">
-                            <field name="line_ids"/>
+                            <field name="line_ids" readonly="state != 'draft'"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -50,8 +85,8 @@
             <list string="Product Lines" editable="bottom">
                 <field name="product_id" string="Product"/>
                 <field name="quantity" string="Quantity"/>
-<!--                <button type="object" icon="fa-check" string="Add to PO" />-->
-<!--                <button type="object" icon="fa-check" string="Add to Internal Transfer"/>-->
+                <button type="object" icon="fa-check" string="Purchase Order"/>
+                <button type="object" icon="fa-check" string="Internal Transfer"/>
             </list>
         </field>
     </record>
@@ -61,4 +96,6 @@
         <field name="res_model">requisition.component</field>
         <field name="view_mode">list,form</field>
     </record>
+
+
 </odoo>

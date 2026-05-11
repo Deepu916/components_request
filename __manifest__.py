@@ -13,6 +13,7 @@
         'security/requisition_groups.xml',
         'security/ir_user_rules.xml',
         'security/ir.model.access.csv',
+        'wizard/create_po_views.xml',
         'views/requisition_component_views.xml',
         'views/requisition_component_menus.xml',
     ],
