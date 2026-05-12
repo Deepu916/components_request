@@ -35,23 +35,45 @@
                             groups="components_request.requisition_group_head"
                             invisible="state != 'manager'"/>
 
-                    <button name="%(action_create_po)d"
+                    <button name="action_create_po"
                             class="btn-primary"
-                            type="action"
+                            type="object"
                             string="Create PO"
                             groups="components_request.requisition_group_head"
                             invisible="not create_po"/>
 
-                    <button  name="%(action_create_in)d"
+                    <button  name="action_create_in"
                              class="btn-primary"
-                             type="action"
+                             type="object"
                              string="Internal Transfer"
                              groups="components_request.requisition_group_head"
                              invisible="not create_internal_transfer"/>
-
                     <field name="state" widget="statusbar" readonly="true"/>
                 </header>
                 <sheet>
+<!--                    <div class="oe_button_box" name="button_box">-->
+<!--                        <button type="object"-->
+<!--                                name="action_po"-->
+<!--                                class="oe_stat_button"-->
+<!--                                icon="fa-list"-->
+<!--                                invisible="not po_smart">-->
+<!--                            <field-->
+<!--                                    name="po_count"-->
+<!--                                   widget="statinfo"-->
+<!--                                   string="Purchase Orders"/>-->
+<!--                        </button>-->
+
+<!--                        <button type="object"-->
+<!--                                name="action_in"-->
+<!--                                class="oe_stat_button"-->
+<!--                                icon="fa-list"-->
+<!--                                >-->
+<!--                            <field-->
+<!--                                    name="internal_count"-->
+<!--                                   widget="statinfo"-->
+<!--                                   string="Internal Transfers"/>-->
+<!--                        </button>-->
+<!--                    </div>-->
                     <group>
                         <field name="employee_id"/>
                     </group>
@@ -85,8 +107,11 @@
             <list string="Product Lines" editable="bottom">
                 <field name="product_id" string="Product"/>
                 <field name="quantity" string="Quantity"/>
-                <button type="object" icon="fa-check" string="Purchase Order"/>
-                <button type="object" icon="fa-check" string="Internal Transfer"/>
+                <field name="uom_id" string="Units"/>
+<!--                <field name="source_id" string="Source Location"/>-->
+<!--                <field name="destination_id" string="Destination" domain="[('usage','=','internal')]"/>-->
+                <button type="object" icon="fa-check" string="Purchase Order" invisible="qty_on_hand > quantity"/>
+                <button type="object" icon="fa-check" string="Internal Transfer" invisible="quantity > qty_on_hand"/>
             </list>
         </field>
     </record>
@@ -96,6 +121,4 @@
         <field name="res_model">requisition.component</field>
         <field name="view_mode">list,form</field>
     </record>
-
-
 </odoo>
