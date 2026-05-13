@@ -1,32 +1,43 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields,api
+"""Requisition Component Model"""
+from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
 
 class RequisitionComponent(models.Model):
-    """Requisition Component class"""
+    """Requisition Component Model"""
     _name = 'requisition.component'
     _description = 'Requisition Component'
     _rec_name = 'employee_id'
 
-
-    employee_id = fields.Many2one('hr.employee', string='Employee',default=lambda self: self.env.user.employee_id,readonly=True)
-    line_ids = fields.One2many('requisition.line', 'requisition_id', string='Lines',ondelete='cascade')
+    employee_id = fields.Many2one('hr.employee',
+                                  string='Employee',
+                                  default=lambda self: self.env.user.employee_id,
+                                  readonly=True)
+    line_ids = fields.One2many('requisition.line',
+                               'requisition_id',
+                               string='Lines',
+                               ondelete='cascade')
     create_po = fields.Boolean(default=False)
     create_internal_transfer = fields.Boolean(default=False)
-    po_count = fields.Integer(default=0)
-    po_smart = fields.Boolean(default=False)
-    in_smart = fields.Boolean(default=False)
-    internal_count = fields.Integer(default=0)
-    order_ids = []
-    internal_ids = []
+    po_count = fields.Integer(compute='_compute_counts', store=True)
+    internal_count = fields.Integer(compute='_compute_counts', store=True)
+    purchase_order_ids = fields.Many2many('purchase.order', string='Purchase Orders')
+    internal_transfer_ids = fields.Many2many('stock.picking', string='Internal Transfers')
     state = fields.Selection([
         ('draft', 'Draft'),
         ('requested', 'Requested'),
         ('manager', 'Manager Approved'),
-        ('head','Head Approved'),
-        ('rejected','Rejected'),
-    ],default='draft')
+        ('head', 'Head Approved'),
+        ('rejected', 'Rejected'),
+    ], default='draft')
+
+    @api.depends('purchase_order_ids', 'internal_transfer_ids')
+    def _compute_counts(self):
+        for record in self:
+            record.po_count = len(record.purchase_order_ids)
+            record.internal_count = len(record.internal_transfer_ids)
+
     def action_request(self):
         """Request button action"""
         if not self.line_ids:
@@ -39,58 +50,68 @@ class RequisitionComponent(models.Model):
             else:
                 self.create_internal_transfer = True
         self.state = 'requested'
+
     def action_manager(self):
-        """Manager approval action"""
+        """Manager approval button action"""
         self.state = 'manager'
+
     def action_head(self):
-        """Head approval action"""
+        """Head approval button action"""
         self.state = 'head'
+
     def action_create_po(self):
-        """"Create PO action"""
-        if self.state!='head':
-            raise ValidationError('PO can create only after the approval of the head')
-        return{
-            'name':'Create PO',
-            'type':'ir.actions.act_window',
-            'res_model': 'create.po',
-            'view_mode': 'form',
-            'target': 'new',
-            'context': {'default_line_ids': self.line_ids.ids,'default_create_type':'po','default_parent_id': self.id},
-        }
-    def action_create_in(self):
-        """Create Internal Transfer action"""
-        if self.state!='head':
+        """"Create PO action for opening the wizard"""
+        if self.state != 'head':
             raise ValidationError('PO can create only after the approval of the head')
         return {
-            'name':'Create Internal Transfer',
+            'name': 'Create PO',
             'type': 'ir.actions.act_window',
             'res_model': 'create.po',
             'view_mode': 'form',
             'target': 'new',
-            'context': {'default_line_ids': self.line_ids.ids,'default_create_type':'in'}
+            'context': {'default_line_ids': self.line_ids.ids, 'default_create_type': 'po',
+                        'default_parent_id': self.id},
         }
+
+    def action_create_in(self):
+        """Create Internal Transfer action for opening the wizard"""
+        if self.state != 'head':
+            raise ValidationError('PO can create only after the approval of the head')
+        return {
+            'name': 'Create Internal Transfer',
+            'type': 'ir.actions.act_window',
+            'res_model': 'create.po',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_line_ids': self.line_ids.ids, 'default_create_type': 'in',
+                        'default_parent_id': self.id}
+        }
+
     def action_reject(self):
-        """Reject action"""
+        """Reject button action"""
         self.state = 'rejected'
-    # def action_po(self):
-    #     """PO smart button action"""
-    #     print(self.order_ids)
-    #     return{
-    #         'name':'Purchase Orders',
-    #         'type': 'ir.actions.act_window',
-    #         'res_model': 'purchase.order',
-    #         'view_mode': 'list,form',
-    #         'domain':[('id', 'in', self.order_ids)],
-    #     }
-    # def action_in(self):
-    #     """Internal Transfer smart button action"""
-    #     return{
-    #         'name':'Internal Transfers',
-    #         'type': 'ir.actions.act_window',
-    #         'res_model': 'stock.picking',
-    #         'view_mode': 'list,form',
-    #         'domain':[('id', 'in', self.internal_ids),('')],
-    #     }
+
+    def action_po(self):
+        """PO smart button action"""
+        return {
+            'name': 'Purchase Orders',
+            'type': 'ir.actions.act_window',
+            'res_model': 'purchase.order',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', self.purchase_order_ids.ids)],
+        }
+
+    def action_in(self):
+        """Internal Transfer smart button action"""
+        return {
+            'name': 'Internal Transfers',
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.picking',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', self.internal_transfer_ids.ids)],
+        }
+
+
 class RequisitionLine(models.Model):
     """Requisition line model"""
     _name = 'requisition.line'
@@ -98,10 +119,6 @@ class RequisitionLine(models.Model):
 
     requisition_id = fields.Many2one('requisition.component', string='Requisition')
     product_id = fields.Many2one('product.product', string='Product')
-    quantity = fields.Float(string='Quantity', default=0.0,required=True)
+    quantity = fields.Float(string='Quantity', default=0.0, required=True)
     uom_id = fields.Many2one('uom.uom', related='product_id.uom_id', string='Units')
-    po = fields.Boolean(default=False)
-    internal = fields.Boolean(default=False)
-    qty_on_hand = fields.Float(string='Qty On Hand',related = 'product_id.qty_available')
-    source_id = fields.Many2one('stock.location',related='product_id.location_id',string='Source')
-    destination_id = fields.Many2one('stock.location', string='Destination Location')
+    qty_on_hand = fields.Float(string='Qty On Hand', related='product_id.qty_available')

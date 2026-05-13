@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models, api
+"""Create PO Wizard Model"""
+from odoo import fields, models
 
 
 class CreatePo(models.TransientModel):
@@ -13,21 +14,17 @@ class CreatePo(models.TransientModel):
     destination_location_id = fields.Many2one('stock.location',string='Destination Location')
     create_type = fields.Char(string='Create Type')
     parent_id = fields.Many2one('requisition.component')
-    orders = []
-    internal = []
 
 
     def action_create_purchase_order(self):
         """Create Purchase Order action"""
-        self.parent_id.order_ids.clear()
         for ids in self.partner_ids:
             order = self.env['purchase.order'].create(
                 {
                     'partner_id':ids.id,
                 }
             )
-            self.parent_id.order_ids.append(order.id)
-            self.orders.append(order.id)
+            self.parent_id.purchase_order_ids = [fields.Command.link(order.id)]
             for line in self.line_ids:
                 if line.qty_on_hand < line.quantity:
                     self.env['purchase.order.line'].create({
@@ -35,16 +32,13 @@ class CreatePo(models.TransientModel):
                         'product_id': line.product_id.id,
                         'product_qty': line.quantity,
                     })
-        self.parent_id.po_count = len(self.orders)
         self.parent_id.create_po = False
-        self.parent_id.po_smart = True
-        print(len(self.partner_ids))
+        print(len(self.parent_id.purchase_order_ids))
+        print(self.parent_id.purchase_order_ids)
 
     def action_create_internal_transfer(self):
         """create internal transfer action"""
         picking_type_id = self.env['stock.picking.type'].search([('name','=','Internal Transfers')])
-        print("picking type",picking_type_id)
-
         for line in self.line_ids:
             if line.qty_on_hand > line.quantity:
                 quant = self.env['stock.quant'].search([('product_id','=',line.product_id)],limit=1)
@@ -54,16 +48,15 @@ class CreatePo(models.TransientModel):
                     'location_id':quant.location_id.id,
                     'location_dest_id':self.destination_location_id.id,
                 })
-                self.internal.append(stock.id)
-                self.parent_id.internal_ids.append(stock.id)
+                self.parent_id.internal_transfer_ids =[fields.Command.link(stock.id)]
+                print(stock)
+                print(len(self.parent_id.internal_transfer_ids))
                 self.env['stock.move'].create({
                     'picking_id':stock.id,
                     'product_id':line.product_id.id,
                     'product_uom_qty':line.quantity,
                 })
-        print(len(self.internal))
-        self.parent_id.internal_count = len(self.internal)
+                stock.button_validate()
         self.parent_id.create_internal_transfer = False
-        self.parent_id.in_smart = True
-        stock.button_validate()
-        print(self.parent_id.create_internal_transfer)
+        print(len(self.parent_id.internal_transfer_ids))
+        print(self.parent_id.internal_transfer_ids)
